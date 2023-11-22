@@ -50,34 +50,36 @@ export default class ProductManager {
     }
   };
 
-  updateProduct = async (id, updateField) => {
+  updateProduct = async (pid, updateFields) => {
     // Recibe el id del producto a actualizar, así también como el campo a actualizar (puede ser el objeto completo, como en una DB), y actualiza el producto que tenga ese id en el archivo. SIN BORRAR SU ID:
     const products = await this.getProducts();
 
-    const productIndex = products.findIndex((product) => product.id === id);
+    const productIndex = products.findIndex(product => product.id === pid);
 
     if (productIndex !== -1) {
-      products[productIndex] = {
+      const {pid, ...updatedFields} = updateFields;
+      const updatedProduct = {
         ...products[productIndex],
-        ...updateField,
-        id,
+        ...updatedFields,
+        pid,
       };
+      products[productIndex] = updatedProduct;
       await fs.promises.writeFile(
         this.path,
         JSON.stringify(products, null, "\t")
       );
-      return products[productIndex];
+      return updatedProduct;
     } else {
       return console.log("Error: producto no encontrado");
     }
   };
 
-  deleteProduct = async (id) => {
+  deleteProduct = async (pid) => {
     // Recibe un id y elimina el producto que tenga ese id en el archivo:
     const products = await this.getProducts();
 
-    const productIndex = products.findIndex((product) => product.id === id);
-    if (id === 0) {
+    const productIndex = products.findIndex((product) => product.id === pid);
+    if (pid === 0) {
       console.log("Error: id inexistente");
     }
     if (productIndex === -1) {
@@ -88,11 +90,7 @@ export default class ProductManager {
         this.path,
         JSON.stringify(products, null, "\t")
       );
-      return console.log(products);
+      return products;
     }
   };
-}
-
-const manager = new ProductManager();
-
-manager.getProducts();
+};
